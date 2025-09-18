@@ -1,0 +1,60 @@
+from django.contrib.auth.models import User
+from news.models import Author, Category, Post, PostCategory, Comment
+
+# 1) Create two users
+u1 = User.objects.create_user('alice', password='alicepass')
+u2 = User.objects.create_user('bob', password='bobpass')
+
+# 2) Create two authors linked to the users
+a1 = Author.objects.create(user=u1)
+a2 = Author.objects.create(user=u2)
+
+# 3) Add 4 categories
+c1 = Category.objects.create(name='Спорт')
+c2 = Category.objects.create(name='Политика')
+c3 = Category.objects.create(name='Образование')
+c4 = Category.objects.create(name='Технологии')
+
+# 4) Add 2 articles and 1 news
+p1 = Post.objects.create(author=a1, post_type=Post.ARTICLE, title='Первая статья', text='Текст первой статьи ...')
+p2 = Post.objects.create(author=a1, post_type=Post.ARTICLE, title='Вторая статья', text='Очень длинный текст второй статьи ...')
+p3 = Post.objects.create(author=a2, post_type=Post.NEWS, title='Срочная новость', text='Короткий текст новости ...')
+
+# 5) Assign categories (at least one with 2+ categories)
+p1.categories.add(c1, c2)
+p2.categories.add(c3)
+p3.categories.add(c2, c4)
+
+# 6) Create at least 4 comments (each Post has at least one)
+cm1 = Comment.objects.create(post=p1, user=u2, text='Отличная статья!')
+cm2 = Comment.objects.create(post=p1, user=u1, text='Спасибо за отзыв!')
+cm3 = Comment.objects.create(post=p2, user=u2, text='Неплохо, но можно лучше.')
+cm4 = Comment.objects.create(post=p3, user=u1, text='Интересная новость.')
+
+# 7) Apply likes/dislikes to adjust ratings
+p1.like(); p1.like(); p1.like(); p1.dislike()
+p2.like(); p2.dislike(); p2.dislike()
+p3.like(); p3.like()
+
+cm1.like(); cm1.like()
+cm2.dislike()
+cm3.like()
+cm4.like(); cm4.dislike(); cm4.dislike()
+
+# 8) Update authors ratings
+a1.update_rating()
+a2.update_rating()
+
+# 9) Output best user (by rating)
+best_author = Author.objects.order_by('-rating').select_related('user').first()
+best_author.user.username, best_author.rating
+
+# 10) Best article by likes/dislikes
+best_post = Post.objects.order_by('-rating').select_related('author__user').first()
+best_post.created_at, best_post.author.user.username, best_post.rating, best_post.title, best_post.preview()
+
+# 11) All comments for this best article
+comments = Comment.objects.filter(post=best_post).select_related('user').order_by('created_at')
+[(c.created_at, c.user.username, c.rating, c.text) for c in comments]
+
+
