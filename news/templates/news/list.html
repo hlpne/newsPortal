@@ -1,0 +1,20 @@
+{% extends 'default.html' %}
+{% load news_filters %}
+
+{% block title %}Новости{% endblock %}
+
+{% block content %}
+<h2>Новости</h2>
+<ul>
+  {% for p in posts %}
+    <li>
+      <a href="/news/{{ p.id }}/">{{ p.title|censor }}</a>
+      — {{ p.created_at|date:'d.m.Y' }} — {{ p.text|slice:':20'|censor }}
+    </li>
+  {% empty %}
+    <li>Пока пусто</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
+
+
