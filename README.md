@@ -1,34 +1,49 @@
-# News Portal (+ Censorship Filter)
+# News Portal
 
-## Setup
+## Установка и запуск
 
-1. Create venv and install deps:
-```
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install django
-```
+1. **Создание виртуального окружения и установка зависимостей**
 
-2. Migrate:
-```
-.\.venv\Scripts\python.exe manage.py migrate
-```
+   ```bash
+   python -m venv .venv
+   .\.venv\Scripts\python.exe -m pip install --upgrade pip
+   .\.venv\Scripts\python.exe -m pip install django
+   ```
 
-3. Run dev server:
-```
-.\.venv\Scripts\python.exe manage.py runserver
-```
+2. **Применение миграций**
 
-Open http://127.0.0.1:8000/news/
+   ```bash
+   .\.venv\Scripts\python.exe manage.py migrate
+   ```
 
-## Tests
-```
-.\.venv\Scripts\python.exe manage.py test
-```
+3. **Запуск сервера разработки**
 
-## Functionality
-- List: /news/ — shows censored title and first 20 chars, date d.m.Y
-- Detail: /news/<id>/ — shows censored title/content, date dd.mm.yyyy
-- Censor filter: `news/templatetags/news_filters.py`, raises TypeError for non-strings
+   ```bash
+   .\.venv\Scripts\python.exe manage.py runserver
+   ```
 
+   После запуска проект будет доступен по адресу:
+   [http://127.0.0.1:8000/news/](http://127.0.0.1:8000/news/)
+
+---
+
+## Функциональность проекта
+
+* **Список новостей** (`/news/`)
+  Отображает:
+
+  * заголовок статьи (с цензурой),
+  * дату публикации в формате `д.м.Г`,
+  * первые 20 символов текста (с применением цензуры).
+
+* **Детальная страница** (`/news/<id>/`)
+  Отображает:
+
+  * заголовок (с цензурой),
+  * полный текст (с цензурой),
+  * дату публикации в формате `дд.мм.гггг`.
+
+* **Фильтр цензуры** (`news/templatetags/news_filters.py`)
+  Заменяет запрещённые слова на звёздочки (`*`), оставляя первую букву.
+  При попытке применить фильтр не к строке выбрасывается `TypeError`.
 
