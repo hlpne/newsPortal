@@ -1,17 +1,17 @@
 {% extends 'default.html' %}
 {% load news_filters %}
 
-{% block title %}Новости{% endblock %}
+{% block title %}Статьи{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Новости</h2>
-    <a href="{% url 'news_create' %}" class="btn btn-primary">Добавить новость</a>
+    <h2>Статьи</h2>
+    <a href="{% url 'article_create' %}" class="btn btn-primary">Добавить статью</a>
 </div>
 
 <div class="mb-3">
+    <a href="{% url 'news_list' %}" class="btn btn-outline-info">Новости</a>
     <a href="{% url 'news_search' %}" class="btn btn-outline-secondary">Поиск новостей</a>
-    <a href="{% url 'article_list' %}" class="btn btn-outline-info">Статьи</a>
 </div>
 
 {% if posts %}
@@ -21,7 +21,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">
-                            <a href="{% url 'news_detail' post.pk %}" class="text-decoration-none">
+                            <a href="{% url 'article_detail' post.pk %}" class="text-decoration-none">
                                 {{ post.title|censor }}
                             </a>
                         </h5>
@@ -31,8 +31,8 @@
                                 {{ post.created_at|date:'d.m.Y H:i' }} | {{ post.author.user.username }}
                             </small>
                             <div>
-                                <a href="{% url 'news_edit' post.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                                <a href="{% url 'news_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                                <a href="{% url 'article_edit' post.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                                <a href="{% url 'article_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
                             </div>
                         </div>
                     </div>
@@ -105,11 +105,9 @@
 
 {% else %}
     <div class="alert alert-info">
-        <h4>Новостей пока нет</h4>
-        <p>Будьте первым, кто добавит новость!</p>
-        <a href="{% url 'news_create' %}" class="btn btn-primary">Добавить новость</a>
+        <h4>Статей пока нет</h4>
+        <p>Будьте первым, кто добавит статью!</p>
+        <a href="{% url 'article_create' %}" class="btn btn-primary">Добавить статью</a>
     </div>
 {% endif %}
 {% endblock %}
-
-

@@ -11,8 +11,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">{{ post.title|censor }}</h2>
                     <div>
-                        <a href="{% url 'news_edit' post.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                        <a href="{% url 'news_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                        <a href="{% url 'article_edit' post.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                        <a href="{% url 'article_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
                     </div>
                 </div>
             </div>
@@ -48,14 +48,12 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="{% url 'news_list' %}" class="btn btn-outline-primary">Все новости</a>
+                    <a href="{% url 'article_list' %}" class="btn btn-outline-primary">Все статьи</a>
+                    <a href="{% url 'news_list' %}" class="btn btn-outline-info">Новости</a>
                     <a href="{% url 'news_search' %}" class="btn btn-outline-secondary">Поиск новостей</a>
-                    <a href="{% url 'article_list' %}" class="btn btn-outline-info">Статьи</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-
-

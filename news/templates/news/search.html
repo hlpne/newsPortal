@@ -1,20 +1,47 @@
 {% extends 'default.html' %}
 {% load news_filters %}
 
-{% block title %}Новости{% endblock %}
+{% block title %}Поиск новостей{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Новости</h2>
-    <a href="{% url 'news_create' %}" class="btn btn-primary">Добавить новость</a>
+    <h2>Поиск новостей</h2>
+    <a href="{% url 'news_list' %}" class="btn btn-outline-secondary">Все новости</a>
 </div>
 
-<div class="mb-3">
-    <a href="{% url 'news_search' %}" class="btn btn-outline-secondary">Поиск новостей</a>
-    <a href="{% url 'article_list' %}" class="btn btn-outline-info">Статьи</a>
+<!-- Форма поиска -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Фильтры поиска</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="{{ filter.form.title.id_for_label }}" class="form-label">{{ filter.form.title.label }}</label>
+                {{ filter.form.title }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ filter.form.author.id_for_label }}" class="form-label">{{ filter.form.author.label }}</label>
+                {{ filter.form.author }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ filter.form.date_after.id_for_label }}" class="form-label">{{ filter.form.date_after.label }}</label>
+                {{ filter.form.date_after }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Поиск</button>
+                <a href="{% url 'news_search' %}" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
 </div>
 
+<!-- Результаты поиска -->
 {% if posts %}
+    <div class="mb-3">
+        <h5>Найдено новостей: {{ paginator.count }}</h5>
+    </div>
+
     <div class="row">
         {% for post in posts %}
             <div class="col-md-6 mb-3">
@@ -41,21 +68,21 @@
         {% endfor %}
     </div>
 
-    <!-- Пагинация -->
+    <!-- Пагинация с сохранением фильтров -->
     {% if is_paginated %}
         <nav aria-label="Навигация по страницам">
             <ul class="pagination justify-content-center">
                 <!-- Первая страница -->
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1">Первая</a>
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">Первая</a>
                     </li>
                 {% endif %}
 
                 <!-- Предыдущая страница -->
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">Назад</a>
                     </li>
                 {% endif %}
 
@@ -74,7 +101,7 @@
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -89,14 +116,14 @@
                 <!-- Следующая страница -->
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Вперёд</a>
                     </li>
                 {% endif %}
 
                 <!-- Последняя страница -->
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ paginator.num_pages }}">Последняя</a>
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ paginator.num_pages }}">Последняя</a>
                     </li>
                 {% endif %}
             </ul>
@@ -105,11 +132,8 @@
 
 {% else %}
     <div class="alert alert-info">
-        <h4>Новостей пока нет</h4>
-        <p>Будьте первым, кто добавит новость!</p>
-        <a href="{% url 'news_create' %}" class="btn btn-primary">Добавить новость</a>
+        <h4>Ничего не найдено</h4>
+        <p>Попробуйте изменить параметры поиска или <a href="{% url 'news_list' %}">посмотрите все новости</a>.</p>
     </div>
 {% endif %}
 {% endblock %}
-
-
