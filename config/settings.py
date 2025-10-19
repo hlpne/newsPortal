@@ -149,7 +149,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # Куда редиректить
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/news/'
 
 # Кастомная форма регистрации
 ACCOUNT_FORMS = {'signup': 'sign.models.CommonSignupForm'}
