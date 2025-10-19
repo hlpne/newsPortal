@@ -2,6 +2,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django_filters.views import FilterView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from .models import Post
 from .forms import PostForm
 from .filters import PostFilter
@@ -103,14 +104,21 @@ class NewsDetailView(DetailView):
         return Post.objects.filter(post_type=Post.NEWS).select_related('author__user')
 
 
-class NewsCreateView(CreateView):
+class NewsCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/news_form.html'
+    permission_required = ('news.add_post',)
 
     def form_valid(self, form):
         instance = form.save(commit=False)
         instance.post_type = Post.NEWS
+        
+        # Автоматически назначаем автора из текущего пользователя
+        from .models import Author
+        author, created = Author.objects.get_or_create(user=self.request.user)
+        instance.author = author
+        
         instance.save()
         form.save_m2m()  # Сохраняем связи many-to-many (категории)
         return super().form_valid(form)
@@ -119,10 +127,11 @@ class NewsCreateView(CreateView):
         return reverse_lazy('news_detail', kwargs={'pk': self.object.pk})
 
 
-class NewsUpdateView(UpdateView):
+class NewsUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/news_form.html'
+    permission_required = ('news.change_post',)
 
     def get_queryset(self):
         return Post.objects.filter(post_type=Post.NEWS)
@@ -140,14 +149,21 @@ class NewsDeleteView(DeleteView):
         return Post.objects.filter(post_type=Post.NEWS)
 
 
-class ArticleCreateView(CreateView):
+class ArticleCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/article_form.html'
+    permission_required = ('news.add_post',)
 
     def form_valid(self, form):
         instance = form.save(commit=False)
         instance.post_type = Post.ARTICLE
+        
+        # Автоматически назначаем автора из текущего пользователя
+        from .models import Author
+        author, created = Author.objects.get_or_create(user=self.request.user)
+        instance.author = author
+        
         instance.save()
         form.save_m2m()  # Сохраняем связи many-to-many (категории)
         return super().form_valid(form)
@@ -156,10 +172,11 @@ class ArticleCreateView(CreateView):
         return reverse_lazy('article_detail', kwargs={'pk': self.object.pk})
 
 
-class ArticleUpdateView(UpdateView):
+class ArticleUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'news/article_form.html'
+    permission_required = ('news.change_post',)
 
     def get_queryset(self):
         return Post.objects.filter(post_type=Post.ARTICLE)
