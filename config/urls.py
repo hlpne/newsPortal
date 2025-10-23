@@ -16,11 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from news.views import NewsListView
+from oauth_views import google_login_direct, yandex_login_direct
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('protect.urls')),
+    path('', NewsListView.as_view(), name='home'),  # Show news on root URL
+    path('protect/', include('protect.urls')),  # Move protect to /protect/
     path('sign/', include('sign.urls')),
     path('accounts/', include('allauth.urls')),
     path('news/', include('news.urls')),
+    
+    # Direct OAuth redirects
+    path('oauth/google/', google_login_direct, name='google_direct'),
+    path('oauth/yandex/', yandex_login_direct, name='yandex_direct'),
 ]

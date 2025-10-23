@@ -153,3 +153,33 @@ LOGIN_REDIRECT_URL = '/news/'
 
 # Кастомная форма регистрации
 ACCOUNT_FORMS = {'signup': 'sign.models.CommonSignupForm'}
+
+# Social login settings - direct redirect to providers
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'yandex': {
+        'SCOPE': [
+            'login:email',
+            'login:info',
+        ],
+    }
+}
+
+# Skip intermediate pages for social logins
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Bypass intermediate pages - go directly to OAuth providers
+SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_USERNAME_REQUIRED = False

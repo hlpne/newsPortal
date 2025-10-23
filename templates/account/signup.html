@@ -1,0 +1,253 @@
+{% extends "main.html" %}
+{% load socialaccount %}
+{% block title %}Регистрация - News Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                    <h2 class="h3 mb-2">Создать аккаунт</h2>
+                    <p class="text-muted">Присоединяйтесь к нашему сообществу</p>
+                </div>
+
+                <!-- Social Signup Buttons -->
+                <div class="mb-4">
+                    <div class="d-grid gap-2">
+                        <a href="/oauth/google/" class="btn btn-outline-danger btn-lg social-btn">
+                            <i class="fab fa-google me-2"></i>Регистрация через Google
+                        </a>
+                        <a href="/oauth/yandex/" class="btn btn-outline-warning btn-lg social-btn">
+                            <i class="fas fa-search me-2"></i>Регистрация через Yandex
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-center mb-4">
+                    <span class="text-muted">или</span>
+                </div>
+
+                <!-- Regular Signup Form -->
+                <form method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-envelope me-2 text-primary"></i>Email
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-user me-2 text-primary"></i>Имя пользователя
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-lock me-2 text-primary"></i>Пароль
+                        </label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.password1.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-lock me-2 text-primary"></i>Подтверждение пароля
+                        </label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.password2.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                            <label class="form-check-label" for="termsCheck">
+                                Я согласен с <a href="#" class="text-primary">условиями использования</a> и <a href="#" class="text-primary">политикой конфиденциальности</a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Создать аккаунт
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="mb-3">Уже есть аккаунт?</p>
+                    <a href="{% url 'account_login' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-1"></i>Войти
+                    </a>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/" class="text-muted text-decoration-none">
+                        <i class="fas fa-arrow-left me-1"></i>Вернуться на главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control {
+        border-radius: 0.75rem;
+        border: 2px solid #e9ecef;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        height: auto;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        background-color: #fff;
+        transform: translateY(-1px);
+    }
+    
+    .form-label {
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        transition: color 0.3s ease;
+    }
+    
+    .form-control:focus + .form-label,
+    .form-control:focus ~ .form-label {
+        color: #0d6efd;
+    }
+    
+    .btn {
+        border-radius: 0.75rem;
+        font-weight: 600;
+        padding: 0.875rem 1.5rem;
+        transition: all 0.3s ease;
+        text-transform: none;
+        letter-spacing: 0.5px;
+        font-size: 1rem;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    .card {
+        border-radius: 1.5rem;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-check-input {
+        border-radius: 0.5rem;
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        transform: scale(1.05);
+    }
+    
+    .form-check-label {
+        font-weight: 500;
+        color: #495057;
+        transition: color 0.3s ease;
+        margin-left: 0.5rem;
+    }
+    
+    .form-check-input:checked ~ .form-check-label {
+        color: #0d6efd;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+        transform: translateY(-2px);
+    }
+    
+    .social-btn {
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .social-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
+    .form-check-input[type="checkbox"] {
+        border-radius: 0.5rem;
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+    
+    .form-check-input[type="checkbox"]:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+</style>
+{% endblock %}
