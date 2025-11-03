@@ -221,9 +221,5 @@ newsPortal/
 - [django-allauth](https://django-allauth.readthedocs.io/)
 - [django-filter](https://django-filter.readthedocs.io/)
 
----
 
-## 👤 Автор
-
-News Portal - учебный проект на Django
 
