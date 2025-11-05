@@ -55,6 +55,11 @@ Thumbs.db
 # --- Temporary scripts ---
 *.ps1
 
+# --- Celery ---
+celerybeat-schedule
+celerybeat-schedule.*
+celerybeat.pid
+
 # --- Cursor IDE files (should not be in repo) ---
 Cursor.exe
 resources/
