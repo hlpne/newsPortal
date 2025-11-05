@@ -9,28 +9,70 @@
 ```bash
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install django django-allauth django-filter django-apscheduler
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
 > **Примечание**: Для Linux/Mac используйте `.venv/bin/python` вместо `.\.venv\Scripts\python.exe`
 
-### 2. Применение миграций
+### 2. Установка Redis
+
+#### Windows:
+1. Скачайте Redis для Windows с [GitHub Releases](https://github.com/microsoftarchive/redis/releases) или используйте WSL2
+2. Запустите `redis-server.exe`
+
+#### Linux (Ubuntu/Debian):
+```bash
+sudo apt-get update
+sudo apt-get install redis-server
+sudo systemctl start redis-server
+```
+
+#### macOS:
+```bash
+brew install redis
+brew services start redis
+```
+
+Проверьте, что Redis запущен:
+```bash
+redis-cli ping
+# Должен вернуть: PONG
+```
+
+### 3. Применение миграций
 
 ```bash
 .\.venv\Scripts\python.exe manage.py migrate
 ```
 
-### 3. Создание суперпользователя (опционально)
+### 4. Создание суперпользователя (опционально)
 
 ```bash
 .\.venv\Scripts\python.exe manage.py createsuperuser
 ```
 
-### 4. Запуск сервера разработки
+### 5. Запуск сервера разработки
 
+Для полноценной работы необходимо запустить 3 процесса:
+
+#### 5.1. Django сервер (в первом терминале)
 ```bash
 .\.venv\Scripts\python.exe manage.py runserver
 ```
+
+#### 5.2. Celery Worker (во втором терминале)
+```bash
+.\.venv\Scripts\python.exe -m celery -A config worker --loglevel=info
+```
+
+#### 5.3. Celery Beat - планировщик задач (в третьем терминале)
+```bash
+.\.venv\Scripts\python.exe -m celery -A config beat --loglevel=info
+```
+
+> **Для Linux/Mac**: Используйте `.venv/bin/celery` вместо `.\.venv\Scripts\python.exe -m celery`
+
+> **Важно**: Убедитесь, что Redis запущен перед запуском Celery!
 
 После запуска проект будет доступен по адресу:
 - **Главная страница**: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
@@ -94,14 +136,15 @@ python -m venv .venv
 
 ### Email-уведомления
 
-- **Мгновенные уведомления**
+- **Мгновенные уведомления (через Celery)**
   - При создании нового поста все подписчики категорий получают email
   - Персональные письма с ссылкой на новый пост
+  - Отправка выполняется асинхронно через Celery для улучшения производительности
 
-- **Еженедельный дайджест**
-  - Автоматическая рассылка раз в неделю
+- **Еженедельный дайджест (через Celery Beat)**
+  - Автоматическая рассылка каждый понедельник в 8:00 утра
   - Список всех новых постов за последние 7 дней по категориям
-  - Настраивается через `django-apscheduler`
+  - Настраивается через Celery Beat в `config/settings.py`
 
 ### Фильтр цензуры
 
@@ -155,7 +198,9 @@ newsPortal/
 - **Django 5.2+** - Веб-фреймворк
 - **django-allauth** - Аутентификация и OAuth
 - **django-filter** - Фильтрация и поиск
-- **django-apscheduler** - Планировщик задач для дайджестов
+- **Celery 5.3+** - Асинхронная очередь задач
+- **Redis 5.0+** - Брокер сообщений для Celery
+- **django-apscheduler** - Планировщик задач (опционально, для обратной совместимости)
 
 ### База данных
 
@@ -212,6 +257,9 @@ newsPortal/
 - ✅ Исправлена генерация URL в сигналах
 - ✅ Улучшена обработка preview-текста
 - ✅ Оптимизированы запросы к БД (`select_related`, `prefetch_related`)
+- ✅ **Интеграция Celery + Redis** для асинхронной обработки задач
+- ✅ **Асинхронная рассылка уведомлений** через Celery
+- ✅ **Автоматический еженедельный дайджест** через Celery Beat (каждый понедельник в 8:00)
 
 ---
 
