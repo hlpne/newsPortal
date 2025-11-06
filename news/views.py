@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db.models import Count
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from .models import Post, Category, Author
 from .forms import PostForm
 from .filters import PostFilter
@@ -74,6 +76,7 @@ class PostCreateMixin:
         return super().form_valid(form)
 
 
+@method_decorator(cache_page(60 * 5), name='dispatch')  # 5 минут кэширования
 class NewsListView(PaginationWindowMixin, ListView):
     model = Post
     template_name = 'news/list.html'
@@ -103,6 +106,7 @@ class NewsSearchView(PaginationWindowMixin, FilterView):
             .order_by('-created_at')
         )
 
+@method_decorator(cache_page(60 * 5), name='dispatch')  # 5 минут кэширования
 class NewsDetailView(DetailView):
     model = Post
     template_name = 'news/detail.html'
@@ -190,6 +194,7 @@ class ArticleDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
         return Post.objects.filter(post_type=Post.ARTICLE)
 
 
+@method_decorator(cache_page(60 * 5), name='dispatch')  # 5 минут кэширования
 class ArticleListView(PaginationWindowMixin, ListView):
     model = Post
     template_name = 'news/article_list.html'
@@ -205,6 +210,7 @@ class ArticleListView(PaginationWindowMixin, ListView):
         )
 
 
+@method_decorator(cache_page(60 * 5), name='dispatch')  # 5 минут кэширования
 class ArticleDetailView(DetailView):
     model = Post
     template_name = 'news/article_detail.html'

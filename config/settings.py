@@ -200,6 +200,34 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_USERNAME_REQUIRED = False
 
+# Cache Configuration
+# Используем локальное кэширование в памяти по умолчанию
+# Если Redis доступен, можно переключиться на него вручную
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'KEY_PREFIX': 'newsportal',
+        'TIMEOUT': 300,  # 5 минут по умолчанию
+    }
+}
+
+# Если Redis доступен, можно использовать его (раскомментируйте при запущенном Redis):
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',  # Используем базу 1 для кэша (0 для Celery)
+#         'KEY_PREFIX': 'newsportal',
+#         'TIMEOUT': 300,  # 5 минут по умолчанию
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'SOCKET_CONNECT_TIMEOUT': 1,
+#             'SOCKET_TIMEOUT': 1,
+#             'IGNORE_EXCEPTIONS': True,  # Игнорировать ошибки подключения
+#         }
+#     }
+# }
+
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://localhost:6379/0'  # URL для подключения к Redis
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Хранение результатов задач

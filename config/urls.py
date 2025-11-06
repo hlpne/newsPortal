@@ -16,12 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.decorators.cache import cache_page
 from news.views import NewsListView
 from oauth_views import google_login_direct, yandex_login_direct
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', NewsListView.as_view(), name='home'),  # Show news on root URL
+    path('', cache_page(60)(NewsListView.as_view()), name='home'),  # Главная страница - 1 минута кэширования
     path('protect/', include('protect.urls')),  # Move protect to /protect/
     path('sign/', include('sign.urls')),
     path('accounts/', include('allauth.urls')),
