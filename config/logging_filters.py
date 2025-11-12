@@ -52,9 +52,12 @@ class ConsoleFormatter(logging.Formatter):
         # Восстанавливаем оригинальный формат
         self._style._fmt = original_fmt
         
-        # Для ERROR и CRITICAL добавляем exc_info, если он есть
-        if record.levelno >= logging.ERROR and record.exc_info:
-            result += '\n' + self.formatException(record.exc_info)
+        # Для ERROR и CRITICAL добавляем exc_info (стэк ошибки)
+        if record.levelno >= logging.ERROR:
+            if record.exc_info:
+                result += '\n' + self.formatException(record.exc_info)
+            elif record.exc_text:
+                result += '\n' + record.exc_text
         
         return result
 
@@ -72,4 +75,61 @@ class ErrorsFormatter(logging.Formatter):
             result += '\n' + self.formatException(record.exc_info)
         
         return result
+
+
+class AdminEmailHandler(logging.Handler):
+    """
+    Custom AdminEmailHandler that always uses SMTP, even when DEBUG=True.
+    """
+    def __init__(self, include_html=False, email_backend=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.include_html = include_html
+        self.email_backend = email_backend or 'django.core.mail.backends.smtp.EmailBackend'
+    
+    def emit(self, record):
+        from django.core.mail import get_connection
+        from django.utils.log import AdminEmailHandler as DjangoAdminEmailHandler
+        from django.conf import settings
+        from pathlib import Path
+        
+        try:
+            # Загружаем учетные данные из файла
+            def load_email_credentials():
+                credentials = {}
+                credentials_file = Path(settings.BASE_DIR) / 'email_credentials.txt'
+                if credentials_file.exists():
+                    try:
+                        with open(credentials_file, 'r', encoding='utf-8') as f:
+                            for line in f:
+                                line = line.strip()
+                                if line and not line.startswith('#') and '=' in line:
+                                    key, value = line.split('=', 1)
+                                    key = key.strip()
+                                    value = value.strip()
+                                    if key == 'EMAIL_HOST_USER':
+                                        credentials['EMAIL_HOST_USER'] = value
+                                    elif key == 'EMAIL_HOST_PASSWORD':
+                                        credentials['EMAIL_HOST_PASSWORD'] = value
+                    except Exception:
+                        pass
+                return credentials
+            
+            email_credentials = load_email_credentials()
+            
+            # Создаем SMTP connection
+            connection = get_connection(
+                backend=self.email_backend,
+                host=getattr(settings, 'EMAIL_HOST', 'smtp.mail.ru'),
+                port=getattr(settings, 'EMAIL_PORT', 587),
+                username=email_credentials.get('EMAIL_HOST_USER', getattr(settings, 'EMAIL_HOST_USER', '')),
+                password=email_credentials.get('EMAIL_HOST_PASSWORD', getattr(settings, 'EMAIL_HOST_PASSWORD', '')),
+                use_tls=getattr(settings, 'EMAIL_USE_TLS', True),
+            )
+            
+            # Используем стандартный AdminEmailHandler с нашим SMTP connection
+            handler = DjangoAdminEmailHandler(include_html=self.include_html)
+            handler.connection = connection
+            handler.emit(record)
+        except Exception:
+            self.handleError(record)
 

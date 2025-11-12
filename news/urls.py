@@ -5,7 +5,6 @@ from .views import (
     ArticleListView, ArticleDetailView,
     ArticleCreateView, ArticleUpdateView, ArticleDeleteView,
     CategoryListView, CategoryDetailView, subscribe_category, unsubscribe_category,
-    send_test_digest,
 )
 
 app_name = 'news'
@@ -31,9 +30,6 @@ urlpatterns = [
     path('category/<int:pk>/', CategoryDetailView.as_view(), name='category_detail'),
     path('category/<int:pk>/subscribe/', subscribe_category, name='category_subscribe'),
     path('category/<int:pk>/unsubscribe/', unsubscribe_category, name='category_unsubscribe'),
-    
-    # Тестовая отправка дайджеста (только для администраторов)
-    path('send-test-digest/', send_test_digest, name='send_test_digest'),
 ]
 
 

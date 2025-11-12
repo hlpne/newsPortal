@@ -61,6 +61,9 @@ celerybeat-schedule
 celerybeat-schedule.*
 celerybeat.pid
 
+# --- Email credentials (sensitive data) ---
+email_credentials.txt
+
 # --- Cursor IDE files (should not be in repo) ---
 Cursor.exe
 resources/

@@ -12,9 +12,38 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from celery.schedules import crontab
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_email_credentials():
+    """
+    Загружает учетные данные для почты из файла email_credentials.txt.
+    Возвращает словарь с EMAIL_HOST_USER и EMAIL_HOST_PASSWORD.
+    """
+    credentials = {}
+    credentials_file = BASE_DIR / 'email_credentials.txt'
+    
+    if credentials_file.exists():
+        try:
+            with open(credentials_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip()
+                        if key == 'EMAIL_HOST_USER':
+                            credentials['EMAIL_HOST_USER'] = value
+                        elif key == 'EMAIL_HOST_PASSWORD':
+                            credentials['EMAIL_HOST_PASSWORD'] = value
+        except Exception as e:
+            # Если не удалось прочитать файл, используем значения по умолчанию
+            pass
+    
+    return credentials
 
 
 # Quick-start development settings - unsuitable for production
@@ -24,7 +53,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%i+3t0^ayj(&vz+cj3q49nie89tzrno(c&rzl5zghpkyop9$!('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -144,22 +172,24 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # DEV вариант
+# Загружаем учетные данные из файла
+email_credentials = load_email_credentials()
+
+# Настройки SMTP (используются для всех писем)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = email_credentials.get('EMAIL_HOST_USER', 'mockproject@internet.ru')
+EMAIL_HOST_PASSWORD = email_credentials.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'no-reply@news-portal.local'
 
 # Admin email settings for error logging
 ADMINS = [
-    ('Admin', 'admin@news-portal.local'),
+    ('Администратор', 'admin@news-portal.local'),
+    ('Георгий', 'g-ge-v@yandex.ru'),
 ]
-
-# PROD пример (замени на реальные значения)
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.yourprovider.com'
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = '...'
-# EMAIL_HOST_PASSWORD = '...'
-# EMAIL_USE_TLS = True
-# DEFAULT_FROM_EMAIL = 'News Portal <no-reply@yourdomain>'
+SERVER_EMAIL = 'no-reply@news-portal.local'  # Email для отправки сообщений админам
 
 # Логины по email
 ACCOUNT_EMAIL_REQUIRED = True
@@ -331,12 +361,12 @@ LOGGING = {
             'filename': LOGS_DIR / 'security.log',
             'formatter': 'security',
         },
-        # Email обработчик: ERROR и выше, только при DEBUG=False
+        # Email обработчик: ERROR и выше, отправляет через SMTP всегда (даже при DEBUG=True)
         'mail_admins': {
             'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
+            '()': 'config.logging_filters.AdminEmailHandler',
             'formatter': 'email',
-            'filters': ['require_debug_false'],
+            'include_html': False,
         },
     },
     'loggers': {
@@ -344,37 +374,37 @@ LOGGING = {
         'django': {
             'handlers': ['console', 'general_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,  # Разрешаем распространение в root logger
         },
         # Логгер для запросов
         'django.request': {
             'handlers': ['errors_file', 'mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
+            'level': 'DEBUG',  # DEBUG и выше, чтобы все сообщения попадали в root
+            'propagate': True,  # Разрешаем распространение в root logger для консоли
         },
         # Логгер для сервера
         'django.server': {
             'handlers': ['errors_file', 'mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
+            'level': 'DEBUG',  # DEBUG и выше, чтобы все сообщения попадали в root
+            'propagate': True,  # Разрешаем распространение в root logger для консоли
         },
         # Логгер для шаблонов
         'django.template': {
             'handlers': ['errors_file'],
-            'level': 'ERROR',
-            'propagate': False,
+            'level': 'DEBUG',  # DEBUG и выше, чтобы все сообщения попадали в root
+            'propagate': True,  # Разрешаем распространение в root logger для консоли
         },
         # Логгер для базы данных
         'django.db.backends': {
             'handlers': ['errors_file'],
-            'level': 'ERROR',
-            'propagate': False,
+            'level': 'DEBUG',  # DEBUG и выше, чтобы все сообщения попадали в root
+            'propagate': True,  # Разрешаем распространение в root logger для консоли
         },
         # Логгер для безопасности
         'django.security': {
             'handlers': ['security_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,  # Разрешаем распространение в root logger для консоли
         },
     },
     'root': {

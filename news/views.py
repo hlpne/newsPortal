@@ -260,22 +260,3 @@ def unsubscribe_category(request, pk):
     return redirect(category.get_absolute_url())
 
 
-@login_required
-def send_test_digest(request):
-    """Тестовая функция для отправки еженедельного дайджеста (только для тестирования)"""
-    from news.tasks import send_weekly_digest
-
-    if not request.user.is_staff and not request.user.is_superuser:
-        messages.error(request, 'Доступ запрещен. Только для администраторов.')
-        return redirect('news:news_list')
-
-    try:
-        # Вызываем задачу синхронно для тестирования
-        # В production можно использовать send_weekly_digest.delay() для асинхронного выполнения
-        result = send_weekly_digest()
-        messages.success(request, f'Еженедельный дайджест успешно отправлен! {result}')
-    except Exception as e:
-        messages.error(request, f'Ошибка при отправке дайджеста: {str(e)}')
-
-    return redirect('news:news_list')
-
